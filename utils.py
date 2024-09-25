@@ -1,4 +1,4 @@
-from math_module import xp, _scipy, ensure_np_array
+from math_module import xp, xcipy, np_array
 import imshows
 
 import numpy as np
@@ -31,14 +31,58 @@ def pad_or_crop( arr_in, npix ):
         arr_out[x1:x2,x1:x2] = arr_in
     return arr_out
 
+def save_fits(fpath, data, header=None, ow=True, quiet=False):
+    if header is not None:
+        keys = list(header.keys())
+        hdr = fits.Header()
+        for i in range(len(header)):
+            hdr[keys[i]] = header[keys[i]]
+    else: 
+        hdr = None
+    
+    data = np_array(data)
+    
+    hdu = fits.PrimaryHDU(data=data, header=hdr)
+    hdu.writeto(str(fpath), overwrite=ow) 
+    if not quiet: print('Saved data to: ', str(fpath))
+
+def load_fits(fpath, header=False):
+    data = xp.array(fits.getdata(fpath))
+    if header:
+        hdr = fits.getheader(fpath)
+        return data, hdr
+    else:
+        return data
+
+# functions for saving python objects
+def save_pickle(fpath, data, quiet=False):
+    out = open(str(fpath), 'wb')
+    pickle.dump(data, out)
+    out.close()
+    if not quiet: print('Saved data to: ', str(fpath))
+
+def load_pickle(fpath):
+    infile = open(str(fpath),'rb')
+    pkl_data = pickle.load(infile)
+    infile.close()
+    return pkl_data
+
+def centroid(im, normalized=False, thresh=1e-1):
+    if not normalized:
+        im /= im.max()
+    mask = im>thresh
+    # imshow3(mask, im, mask*im, lognorm2=True)
+    cen = skimage.measure.centroid(np_array(mask*im))
+    return np.array([cen[1], cen[0]])
+
 def rotate_arr(arr, rotation, reshape=False, order=3):
     if arr.dtype == complex:
-        arr_r = _scipy.ndimage.rotate(xp.real(arr), angle=rotation, reshape=reshape, order=order)
-        arr_i = _scipy.ndimage.rotate(xp.imag(arr), angle=rotation, reshape=reshape, order=order)
+        arr_r = xcipy.ndimage.rotate(xp.real(arr), angle=rotation, reshape=reshape, order=order)
+        arr_i = xcipy.ndimage.rotate(xp.imag(arr), angle=rotation, reshape=reshape, order=order)
         
         rotated_arr = arr_r + 1j*arr_i
     else:
-        rotated_arr = _scipy.ndimage.rotate(arr, angle=rotation, reshape=reshape, order=order)
+        rotated_arr = xcipy.ndimage.rotate(arr, angle=rotation, reshape=reshape, order=order)
     return rotated_arr
 
 def interp_arr(arr, pixelscale, new_pixelscale, order=3):
@@ -64,7 +108,7 @@ def interp_arr(arr, pixelscale, new_pixelscale, order=3):
 
         coords = xp.array([ivals, jvals])
 
-        interped_arr = _scipy.ndimage.map_coordinates(arr, coords, order=order)
+        interped_arr = xcipy.ndimage.map_coordinates(arr, coords, order=order)
         return interped_arr
 
 def lstsq(modes, data):
@@ -92,43 +136,6 @@ def lstsq(modes, data):
     c, *_ = xp.linalg.lstsq(modes, data, rcond=None)
     return c
 
-def save_fits(fpath, data, header=None, ow=True, quiet=False):
-    if header is not None:
-        keys = list(header.keys())
-        hdr = fits.Header()
-        for i in range(len(header)):
-            hdr[keys[i]] = header[keys[i]]
-    else: 
-        hdr = None
-    
-    data = ensure_np_array(data)
-    
-    hdu = fits.PrimaryHDU(data=data, header=hdr)
-    hdu.writeto(str(fpath), overwrite=ow) 
-    if not quiet: print('Saved data to: ', str(fpath))
-
-# functions for saving python objects
-def save_pickle(fpath, data, quiet=False):
-    out = open(str(fpath), 'wb')
-    pickle.dump(data, out)
-    out.close()
-    if not quiet: print('Saved data to: ', str(fpath))
-
-def load_pickle(fpath):
-    infile = open(str(fpath),'rb')
-    pkl_data = pickle.load(infile)
-    infile.close()
-    return pkl_data
-
-def create_fourier_command(x_cpa=10, y_cpa=10, Nact=34):
-    # cpa = cycles per aperture
-    # max cpa must be Nact/2
-    if x_cpa>Nact/2 or y_cpa>Nact/2:
-        raise ValueError('The cycles per aperture is too high for the specified number of actuators.')
-    y,x = xp.indices((Nact, Nact)) - Nact//2
-    fourier_command = xp.cos(2*np.pi*(x_cpa*x + y_cpa*y)/Nact)
-    return fourier_command
-
 def measure_center_and_angle(waffle_im, psf_pixelscale_lamD, im_thresh=1e-4, r_thresh=12,
                            verbose=True, 
                            plot=True):
@@ -142,7 +149,7 @@ def measure_center_and_angle(waffle_im, psf_pixelscale_lamD, im_thresh=1e-4, r_t
         for j in [0,1]:
             arr = waffle_im[j*npsf//2:(j+1)*npsf//2, i*npsf//2:(i+1)*npsf//2]
             mask = waffle_mask[j*npsf//2:(j+1)*npsf//2, i*npsf//2:(i+1)*npsf//2]
-            cent = np.flip(skimage.measure.centroid(ensure_np_array(mask*arr)))
+            cent = np.flip(skimage.measure.centroid(np_array(mask*arr)))
             cent[0] += i*npsf//2
             cent[1] += j*npsf//2
             centroids.append(cent)
@@ -211,7 +218,7 @@ def measure_pixelscale(sin_im, cpa,
     for i in [0,1]:
         arr = sin_im[:, i*npsf//2:(i+1)*npsf//2]
         mask = sin_mask[:, i*npsf//2:(i+1)*npsf//2]
-        cent = np.flip(skimage.measure.centroid(ensure_np_array(mask*arr)))
+        cent = np.flip(skimage.measure.centroid(np_array(mask*arr)))
         cent[0] += i*npsf//2
         centroids.append(cent)
         # print(cent)

@@ -1,6 +1,5 @@
 import numpy as np
 import scipy
-import poppy
 
 try:
     import cupy
@@ -34,18 +33,18 @@ class scipy_backend:
     
 if cupy_avail:
     xp = np_backend(cupy)
-    _scipy = scipy_backend(cupyx.scipy)
+    xcipy = scipy_backend(cupyx.scipy)
 else:
     xp = np_backend(np)
-    _scipy = scipy_backend(scipy)
+    xcipy = scipy_backend(scipy)
 
 def update_xp(module):
     xp._srcmodule = module
     
 def update_scipy(module):
-    _scipy._srcmodule = module
+    xcipy._srcmodule = module
     
-def ensure_np_array(arr):
+def  np_array(arr):
     if isinstance(arr, np.ndarray):
         return arr
     elif cupy_avail and isinstance(arr, cupy.ndarray):
