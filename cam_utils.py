@@ -36,7 +36,7 @@ class CAM:
         return im
     
     def snap_cube(self):
-        ims = self.grab_many(self.Nframes)
+        ims = np.array(self.cam_stream.grab_many(self.Nframes))
         return ims
 
 

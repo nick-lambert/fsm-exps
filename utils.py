@@ -67,12 +67,14 @@ def load_pickle(fpath):
     infile.close()
     return pkl_data
 
-def centroid(im, normalized=False, thresh=1e-1):
+def centroid(im, normalized=False, thresh=1e-1, plot=False):
     if not normalized:
         im /= im.max()
     mask = im>thresh
     # imshow3(mask, im, mask*im, lognorm2=True)
     cen = skimage.measure.centroid(np_array(mask*im))
+    if plot:
+        imshows.imshow3(im, mask, im*mask, lognorm1=True, lognorm3=True)
     return np.array([cen[1], cen[0]])
 
 def rotate_arr(arr, rotation, reshape=False, order=3):
