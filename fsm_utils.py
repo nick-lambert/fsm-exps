@@ -2,11 +2,19 @@ import numpy as np
 import astropy.units as u
 import time 
 
+import magpyx
+from magpyx.utils import ImageStream
+import purepyindi
+from purepyindi import INDIClient
+import purepyindi2
+from purepyindi2 import IndiClient
+
 L = 12*u.mm # distance between FSM piezo actuators
 B = L * np.cos(30*u.degree) # baseline distance of three piezos
 max_stroke = 10*u.um
 max_voltage = 100
 D_per_V = max_stroke/max_voltage
+# D_per_V = 0.05*u.um
 
 def get_A(alpha, Z):
     return (Z + 2./3. * B * alpha).to(u.m)
