@@ -25,19 +25,19 @@ def get_B(alpha, beta, Z):
 def get_C(alpha, beta, Z):
     return (Z - 1./3. * B * alpha - 1./2. * L * beta).to(u.m)
 
-def get_fsm_volts(tip, tilt, dZ=5*u.um):
+def get_fsm_volts(tip, tilt, dZ=5*u.um, verbose=False):
     tip = tip.to_value(u.radian)
     tilt = tilt.to_value(u.radian)
 
     dA = get_A(tip, dZ)
     dB = get_B(tip, tilt, dZ)
     dC = get_C(tip, tilt, dZ)
-    print(f'Displacements: A = {dA:.2e}, {dB:.2e}, {dC:.2e}. ')
+    if verbose: print(f'Displacements: A = {dA:.2e}, {dB:.2e}, {dC:.2e}. ')
 
     dvA = (dA/D_per_V).decompose().value
     dvB = (dB/D_per_V).decompose().value
     dvC = (dC/D_per_V).decompose().value
-    print(f'Delta Voltages: A = {dvA:.2f}, B = {dvB:.2f}, C = {dvC:.2f}. ')
+    if verbose: print(f'Delta Voltages: A = {dvA:.2f}, B = {dvB:.2f}, C = {dvC:.2f}. ')
 
     return np.array([[dvA, dvB, dvC]]).T
 
