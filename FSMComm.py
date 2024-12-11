@@ -15,29 +15,33 @@ PORT = 1337;
 ether=1;
 
 # Communication variables
-baud = 115200; # This is original slow speed, make sure comms works first
+#baud = 115200; # This is original slow speed, make sure comms works first
+baud = 38400;
+usb_port = '/dev/ttyUSB0'
 timeout = 0.8;
 
 # Need to find out idVendor and idProduct
 class FSM:
-#    def __init__(self, idVendor='1027', idProduct='24593'):
-#        """ This creates the serial connection to the FSM """
-#
+    def __init__(self, idVendor='1027', idProduct='24593'):
+        """ This creates the serial connection to the FSM """
+
 #        self.idVendor = idVendor;
 #        self.idProduct = idProduct;
-#
+
+        self.port = usb_port
+
 #        self.port = self._determine_port();
 #        if self.port is None:
 #            raise ValueError('Could not determine port!')
-#
-##        self.port = '/dev/ttyTHS0'
-#        
-#        try:
-#            print("Trying to connect to serial port");
-#            self.fsmconnect = serial.Serial(self.port, baud, timeout=timeout);
-#        except (serial.SerialException,ValueError):
-#            raise ValueError('There was an error opening the port');
-#        logger.info("Opened the FSM port successfully.");
+
+#        self.port = '/dev/ttyTHS0'
+        
+        try:
+            print("Trying to connect to serial port");
+            self.fsmconnect = serial.Serial(self.port, baud, timeout=timeout);
+        except (serial.SerialException,ValueError):
+            raise ValueError('There was an error opening the port');
+        logger.info("Opened the FSM port successfully.");
 
     # For Ethernet connection init
     def __init__(self):
@@ -65,6 +69,11 @@ class FSM:
                         port = device.device;
                         print(port)
         return port
+
+    def write(self, volts):
+        volts[volts>100] = 100
+        volts[volts<0] = 0
+        self.setHV(volts[0,0], volts[1,0], volts[2,0])
 
         
     def setHV(self,va=0,vb=0,vc=0):
