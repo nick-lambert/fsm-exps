@@ -26,8 +26,8 @@ def get_C(alpha, beta, Z):
     return (Z - 1./3. * B * alpha - 1./2. * L * beta).to(u.m)
 
 def get_fsm_volts(tip, tilt, dZ=5*u.um, verbose=False):
-    tip = tip.to_value(u.radian)
-    tilt = tilt.to_value(u.radian)
+    tip = tip.to_value(u.radian)/2
+    tilt = tilt.to_value(u.radian)/2
 
     dA = get_A(tip, dZ)
     dB = get_B(tip, tilt, dZ)
