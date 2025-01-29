@@ -67,6 +67,38 @@ def stop_fsm_mod(client, delay=0.25):
     client['fsmModulator.zero.request'] = purepyindi.SwitchState.ON
     time.sleep(delay)
 
+def start_fsm_sin_mod(client, delay=0.25):
+    client.wait_for_properties(['fsmSineMod.trigger', 'fsmSineMod.modulating'])
+    client['fsmSineMod.trigger.toggle'] = purepyindi.SwitchState.OFF
+    time.sleep(delay)
+    client['fsmSineMod.modulating.toggle'] = purepyindi.SwitchState.ON
+    time.sleep(delay)
+
+def stop_fsm_sin_mod(client, delay=0.25):
+    client.wait_for_properties(['fsmSineMod.trigger', 'fsmSineMod.modulating', 'fsmSineMod.zero'])
+    client['fsmSineMod.modulating.toggle'] = purepyindi.SwitchState.OFF
+    time.sleep(delay)
+    client['fsmSineMod.trigger.toggle'] = purepyindi.SwitchState.ON
+    time.sleep(delay)
+    client['fsmSineMod.zero.request'] = purepyindi.SwitchState.ON
+    time.sleep(delay)
+
+def start_fsm_square_mod(client, delay=0.25):
+    client.wait_for_properties(['fsmSquareMod.trigger', 'fsmSquareMod.modulating'])
+    client['fsmSquareMod.trigger.toggle'] = purepyindi.SwitchState.OFF
+    time.sleep(delay)
+    client['fsmSquareMod.modulating.toggle'] = purepyindi.SwitchState.ON
+    time.sleep(delay)
+
+def stop_fsm_square_mod(client, delay=0.25):
+    client.wait_for_properties(['fsmSquareMod.trigger', 'fsmSquareMod.modulating', 'fsmSquareMod.zero'])
+    client['fsmSquareMod.modulating.toggle'] = purepyindi.SwitchState.OFF
+    time.sleep(delay)
+    client['fsmSquareMod.trigger.toggle'] = purepyindi.SwitchState.ON
+    time.sleep(delay)
+    client['fsmSquareMod.zero.request'] = purepyindi.SwitchState.ON
+    time.sleep(delay)
+
 def toggle_telem_campupil(on, client):
     client.wait_for_properties(['telem_campupil.writing'])
     if on:
