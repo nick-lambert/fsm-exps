@@ -65,3 +65,18 @@ def stop_fsm_mod(client, delay=0.25):
     client['fsmModulator.trigger.toggle'] = purepyindi.SwitchState.ON
     time.sleep(delay)
     client['fsmModulator.zero.request'] = purepyindi.SwitchState.ON
+    time.sleep(delay)
+
+def toggle_telem_campupil(on, client):
+    client.wait_for_properties(['telem_campupil.writing'])
+    if on:
+        client[f'telem_campupil.writing.toggle'] = purepyindi.SwitchState.ON
+    else:
+        client[f'telem_campupil.writing.toggle'] = purepyindi.SwitchState.OFF
+
+def toggle_telem_fsm(on, client):
+    client.wait_for_properties(['telem_fsm.writing'])
+    if on:
+        client[f'telem_fsm.writing.toggle'] = purepyindi.SwitchState.ON
+    else:
+        client[f'telem_fsm.writing.toggle'] = purepyindi.SwitchState.OFF
