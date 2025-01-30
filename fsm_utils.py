@@ -41,62 +41,30 @@ def get_fsm_volts(tip, tilt, dZ=5*u.um, verbose=False):
 
     return np.array([[dvA, dvB, dvC]]).T
 
-def set_fsm_mod_amp(amp, client, delay=0.25):
-    client.wait_for_properties(['fsmModulator.amp'])
-    client['fsmModulator.amp.target'] = amp
+def set_fsm_mod_amp(amp, client, process_name='fsmModulator', delay=0.25):
+    client.wait_for_properties([f'{process_name}.amp'])
+    client[f'{process_name}.amp.target'] = amp
     time.sleep(delay)
 
-def set_fsm_mod_rate(freq, client, delay=0.25):
-    client.wait_for_properties(['fsmModulator.frequency'])
-    client['fsmModulator.frequency.target'] = freq
+def set_fsm_mod_rate(freq, client, process_name='fsmModulator', delay=0.25):
+    client.wait_for_properties([f'{process_name}.frequency'])
+    client[f'{process_name}.frequency.target'] = freq
     time.sleep(delay)
 
-def start_fsm_mod(client, delay=0.25):
-    client.wait_for_properties(['fsmModulator.trigger', 'fsmModulator.modulating'])
-    client['fsmModulator.trigger.toggle'] = purepyindi.SwitchState.OFF
+def start_fsm_mod(client, process_name='fsmModulator', delay=0.25):
+    client.wait_for_properties([f'{process_name}.trigger', f'{process_name}.modulating'])
+    client[f'{process_name}.trigger.toggle'] = purepyindi.SwitchState.OFF
     time.sleep(delay)
-    client['fsmModulator.modulating.toggle'] = purepyindi.SwitchState.ON
-    time.sleep(delay)
-
-def stop_fsm_mod(client, delay=0.25):
-    client.wait_for_properties(['fsmModulator.trigger', 'fsmModulator.modulating', 'fsmModulator.zero'])
-    client['fsmModulator.modulating.toggle'] = purepyindi.SwitchState.OFF
-    time.sleep(delay)
-    client['fsmModulator.trigger.toggle'] = purepyindi.SwitchState.ON
-    time.sleep(delay)
-    client['fsmModulator.zero.request'] = purepyindi.SwitchState.ON
+    client[f'{process_name}.modulating.toggle'] = purepyindi.SwitchState.ON
     time.sleep(delay)
 
-def start_fsm_sin_mod(client, delay=0.25):
-    client.wait_for_properties(['fsmSineMod.trigger', 'fsmSineMod.modulating'])
-    client['fsmSineMod.trigger.toggle'] = purepyindi.SwitchState.OFF
+def stop_fsm_mod(client, process_name='fsmModulator', delay=0.25):
+    client.wait_for_properties([f'{process_name}.trigger', f'{process_name}.modulating', f'{process_name}.zero'])
+    client[f'{process_name}.modulating.toggle'] = purepyindi.SwitchState.OFF
     time.sleep(delay)
-    client['fsmSineMod.modulating.toggle'] = purepyindi.SwitchState.ON
+    client[f'{process_name}.trigger.toggle'] = purepyindi.SwitchState.ON
     time.sleep(delay)
-
-def stop_fsm_sin_mod(client, delay=0.25):
-    client.wait_for_properties(['fsmSineMod.trigger', 'fsmSineMod.modulating', 'fsmSineMod.zero'])
-    client['fsmSineMod.modulating.toggle'] = purepyindi.SwitchState.OFF
-    time.sleep(delay)
-    client['fsmSineMod.trigger.toggle'] = purepyindi.SwitchState.ON
-    time.sleep(delay)
-    client['fsmSineMod.zero.request'] = purepyindi.SwitchState.ON
-    time.sleep(delay)
-
-def start_fsm_square_mod(client, delay=0.25):
-    client.wait_for_properties(['fsmSquareMod.trigger', 'fsmSquareMod.modulating'])
-    client['fsmSquareMod.trigger.toggle'] = purepyindi.SwitchState.OFF
-    time.sleep(delay)
-    client['fsmSquareMod.modulating.toggle'] = purepyindi.SwitchState.ON
-    time.sleep(delay)
-
-def stop_fsm_square_mod(client, delay=0.25):
-    client.wait_for_properties(['fsmSquareMod.trigger', 'fsmSquareMod.modulating', 'fsmSquareMod.zero'])
-    client['fsmSquareMod.modulating.toggle'] = purepyindi.SwitchState.OFF
-    time.sleep(delay)
-    client['fsmSquareMod.trigger.toggle'] = purepyindi.SwitchState.ON
-    time.sleep(delay)
-    client['fsmSquareMod.zero.request'] = purepyindi.SwitchState.ON
+    client[f'{process_name}.zero.request'] = purepyindi.SwitchState.ON
     time.sleep(delay)
 
 def toggle_telem_campupil(on, client):
@@ -112,3 +80,28 @@ def toggle_telem_fsm(on, client):
         client[f'telem_fsm.writing.toggle'] = purepyindi.SwitchState.ON
     else:
         client[f'telem_fsm.writing.toggle'] = purepyindi.SwitchState.OFF
+
+import shutil
+import os
+import subprocess
+
+def delete_all_data(dir_path):
+    directory = str(dir_path)
+    for filename in os.listdir(directory):
+        file_path = os.path.join(directory, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print('Failed to delete %s. Reason: %s' % (file_path, e))
+
+def move_files(source_path, target_path):
+    file_names = os.listdir(str(source_path))
+    for fname in file_names:
+        # shutil.move(os.path.join(source_dir, file_name), target_dir)
+        src = str(source_path/fname)
+        dest = str(target_path)
+        subprocess.run(['mv', src, dest], check=True)
+
