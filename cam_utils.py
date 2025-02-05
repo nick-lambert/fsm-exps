@@ -27,6 +27,8 @@ class CAM:
         client[f'{self.channel}.roi_set.request'] = purepyindi.SwitchState.ON
         time.sleep(delay)
 
+        self.cam_stream = ImageStream(self.channel)
+
     def set_exptime(self, exptime, client, delay=0.25):
         client.wait_for_properties([f'{self.channel}.exptime',])
         client[f'{self.channel}.exptime.target'] = exptime
