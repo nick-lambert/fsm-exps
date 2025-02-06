@@ -14,7 +14,7 @@ B = L * np.cos(30*u.degree) # baseline distance of three piezos
 max_stroke = 10*u.um
 max_voltage = 100
 D_per_V = max_stroke/max_voltage
-# D_per_V = 0.05*u.um
+D_per_V = 0.08*u.um
 
 def get_A(alpha, Z):
     return (Z + 2./3. * B * alpha).to(u.m)
@@ -25,9 +25,18 @@ def get_B(alpha, beta, Z):
 def get_C(alpha, beta, Z):
     return (Z - 1./3. * B * alpha - 1./2. * L * beta).to(u.m)
 
-def get_fsm_volts(tip, tilt, dZ=5*u.um, verbose=False):
-    tip = tip.to_value(u.radian)/2
+def get_fsm_volts(tip, tilt, dZ=0*u.um, verbose=False, rot=-60.435*u.degree):
+    tip = tip.to_value(u.radian)/2 # divide by two for reflection
     tilt = tilt.to_value(u.radian)/2
+
+    if rot is not None:
+        tt = np.array([tip, tilt])
+        Mrot = np.array([
+            [np.cos(rot), -np.sin(rot)],
+            [np.sin(rot), np.cos(rot)],
+        ])
+        ttrot = Mrot@tt
+        tip, tilt = ttrot[0], ttrot[1]
 
     dA = get_A(tip, dZ)
     dB = get_B(tip, tilt, dZ)
