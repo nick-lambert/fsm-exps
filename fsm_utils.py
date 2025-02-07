@@ -76,41 +76,4 @@ def stop_fsm_mod(client, process_name='fsmModulator', delay=0.25):
     client[f'{process_name}.zero.request'] = purepyindi.SwitchState.ON
     time.sleep(delay)
 
-def toggle_telem_campupil(on, client):
-    client.wait_for_properties(['telem_campupil.writing'])
-    if on:
-        client[f'telem_campupil.writing.toggle'] = purepyindi.SwitchState.ON
-    else:
-        client[f'telem_campupil.writing.toggle'] = purepyindi.SwitchState.OFF
-
-def toggle_telem_fsm(on, client):
-    client.wait_for_properties(['telem_fsm.writing'])
-    if on:
-        client[f'telem_fsm.writing.toggle'] = purepyindi.SwitchState.ON
-    else:
-        client[f'telem_fsm.writing.toggle'] = purepyindi.SwitchState.OFF
-
-import shutil
-import os
-import subprocess
-
-def delete_all_data(dir_path):
-    directory = str(dir_path)
-    for filename in os.listdir(directory):
-        file_path = os.path.join(directory, filename)
-        try:
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.unlink(file_path)
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)
-        except Exception as e:
-            print('Failed to delete %s. Reason: %s' % (file_path, e))
-
-def move_files(source_path, target_path):
-    file_names = os.listdir(str(source_path))
-    for fname in file_names:
-        # shutil.move(os.path.join(source_dir, file_name), target_dir)
-        src = str(source_path/fname)
-        dest = str(target_path)
-        subprocess.run(['mv', src, dest], check=True)
 
