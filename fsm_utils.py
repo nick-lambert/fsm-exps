@@ -1,6 +1,7 @@
 import numpy as np
 import astropy.units as u
 import time 
+from scipy.optimize import curve_fit
 
 import magpyx
 from magpyx.utils import ImageStream
@@ -75,5 +76,18 @@ def stop_fsm_mod(client, process_name='fsmModulator', delay=0.25):
     time.sleep(delay)
     client[f'{process_name}.zero.request'] = purepyindi.SwitchState.ON
     time.sleep(delay)
+
+def sine_func(x, amp, freq, phase, offset): 
+    return amp * np.sin(2*np.pi * freq * x + phase) + offset 
+
+def fit_to_sine(x_data, y_data, freq0):
+    amp0 = (y_data.max() - y_data.min())/2
+    offset0 = y_data.max() - amp0
+    popt, _ = curve_fit(
+        sine_func, 
+        x_data, y_data, 
+        p0=[amp0, freq0, 0, offset0],
+        maxfev=100000,
+)
 
 
